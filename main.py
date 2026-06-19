@@ -134,3 +134,44 @@ def impayes():
         "montant_total_restant": round(total_restant, 2),
         "factures": impayes
     }
+
+@app.get("/chiffre_affaires")
+def chiffre_affaires():
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/invoices"
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=response.text
+        )
+
+    factures = response.json()["data"]
+
+    total_ht = 0
+    total_ttc = 0
+    total_encaisse = 0
+    total_restant = 0
+
+    for facture in factures:
+
+        total_ht += facture["total"]["vat_exclude"]
+        total_ttc += facture["total"]["vat_include"]
+        total_restant += facture["total"]["net_to_pay"]
+        total_encaisse += facture["total"]["paid"]
+
+    return {
+        "nombre_factures": len(factures),
+        "ca_ht": round(total_ht, 2),
+        "ca_ttc": round(total_ttc, 2),
+        "encaisse": round(total_encaisse, 2),
+        "reste_a_encaisser": round(total_restant, 2)
+    }
