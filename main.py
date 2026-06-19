@@ -225,3 +225,62 @@ def recherche_client(nom: str):
         "nombre_resultats": len(resultat),
         "clients": resultat
     }
+
+@app.get("/tableau_de_bord")
+def tableau_de_bord():
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    # Factures
+    url_factures = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/invoices"
+    response_factures = requests.get(url_factures, headers=headers)
+
+    if response_factures.status_code != 200:
+        raise HTTPException(
+            status_code=response_factures.status_code,
+            detail=response_factures.text
+        )
+
+    factures = response_factures.json()["data"]
+
+    # Clients
+    url_clients = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/clients"
+    response_clients = requests.get(url_clients, headers=headers)
+
+    if response_clients.status_code != 200:
+        raise HTTPException(
+            status_code=response_clients.status_code,
+            detail=response_clients.text
+        )
+
+    nb_clients = response_clients.json()["meta"]["total"]
+
+    ca_ht = 0
+    ca_ttc = 0
+    encaisse = 0
+    restant = 0
+    impayes = 0
+
+    for facture in factures:
+
+        ca_ht += facture["total"]["vat_exclude"]
+        ca_ttc += facture["total"]["vat_include"]
+        encaisse += facture["total"]["paid"]
+
+        if facture["status"] != "paid":
+            impayes += 1
+            restant += facture["total"]["net_to_pay"]
+
+    return {
+        "nombre_clients": nb_clients,
+        "nombre_factures": len(factures),
+        "nombre_factures_impayees": impayes,
+        "ca_ht": round(ca_ht, 2),
+        "ca_ttc": round(ca_ttc, 2),
+        "encaisse": round(encaisse, 2),
+        "reste_a_encaisser": round(restant, 2)
+    }
