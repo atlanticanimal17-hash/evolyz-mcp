@@ -185,31 +185,41 @@ def recherche_client(nom: str):
         "Authorization": f"Bearer {token}"
     }
 
-    url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/clients"
-
-    response = requests.get(url, headers=headers)
-
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=response.status_code,
-            detail=response.text
-        )
-
-    clients = response.json()["data"]
-
+    page = 1
     resultat = []
 
-    for client in clients:
+    while True:
 
-        if nom.lower() in client["name"].lower():
+        url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/clients?page={page}"
 
-            resultat.append({
-                "code": client["code"],
-                "nom": client["name"],
-                "ville": client["address"]["town"],
-                "telephone": client["phone"],
-                "mobile": client["mobile"]
-            })
+        response = requests.get(url, headers=headers)
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=response.text
+            )
+
+        data = response.json()
+
+        clients = data["data"]
+
+        for client in clients:
+
+            if nom.lower() in client["name"].lower():
+
+                resultat.append({
+                    "code": client["code"],
+                    "nom": client["name"],
+                    "ville": client["address"]["town"],
+                    "telephone": client["phone"],
+                    "mobile": client["mobile"]
+                })
+
+        if page >= data["meta"]["last_page"]:
+            break
+
+        page += 1
 
     return {
         "nombre_resultats": len(resultat),
