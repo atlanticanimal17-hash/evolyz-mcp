@@ -24,8 +24,19 @@ def tools():
     return {
         "tools": [
             {
-                "name": "test",
-                "description": "Connexion MCP Evoliz"
+                "name": "get_clients",
+                "description": "Liste les clients Evoliz"
+            },
+            {
+                "name": "get_invoices",
+                "description": "Liste les factures Evoliz"
             }
         ]
+    }
+
+@app.get("/mcp")
+def mcp():
+    return {
+        "protocol": "mcp",
+        "version": "1.0"
     }
