@@ -88,6 +88,7 @@ def clients():
         )
 
     return response.json()
+
 @app.get("/impayes")
 def impayes():
 
