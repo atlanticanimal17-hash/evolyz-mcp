@@ -364,3 +364,34 @@ def top_clients():
     )
 
     return classement[:10]
+@app.get("/ca_par_mois")
+def ca_par_mois():
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/invoices"
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=response.text
+        )
+
+    factures = response.json()["data"]
+
+    mois = {}
+
+    for facture in factures:
+
+        cle = facture["documentdate"][:7]
+
+        mois[cle] = mois.get(cle, 0) + facture["total"]["vat_include"]
+
+    return mois
+    
