@@ -68,3 +68,23 @@ def factures():
         )
 
     return response.json()
+@app.get("/clients")
+def clients():
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/clients"
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=response.text
+        )
+
+    return response.json()
