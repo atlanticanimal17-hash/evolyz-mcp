@@ -9,9 +9,23 @@ app = FastAPI(
 def root():
     return {
         "name": "evoliz-mcp",
-        "status": "ok"
+        "status": "ok",
+        "protocol": "mcp"
     }
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy"
+    }
+
+@app.get("/tools")
+def tools():
+    return {
+        "tools": [
+            {
+                "name": "test",
+                "description": "Connexion MCP Evoliz"
+            }
+        ]
+    }
