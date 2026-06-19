@@ -175,3 +175,43 @@ def chiffre_affaires():
         "encaisse": round(total_encaisse, 2),
         "reste_a_encaisser": round(total_restant, 2)
     }
+
+@app.get("/recherche_client/{nom}")
+def recherche_client(nom: str):
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/clients"
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=response.text
+        )
+
+    clients = response.json()["data"]
+
+    resultat = []
+
+    for client in clients:
+
+        if nom.lower() in client["name"].lower():
+
+            resultat.append({
+                "code": client["code"],
+                "nom": client["name"],
+                "ville": client["address"]["town"],
+                "telephone": client["phone"],
+                "mobile": client["mobile"]
+            })
+
+    return {
+        "nombre_resultats": len(resultat),
+        "clients": resultat
+    }
