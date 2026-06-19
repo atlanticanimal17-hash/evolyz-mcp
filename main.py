@@ -326,3 +326,41 @@ def client(nom: str):
         page += 1
 
     return {"erreur": "client introuvable"}
+
+@app.get("/top_clients")
+def top_clients():
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/invoices"
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=response.text
+        )
+
+    factures = response.json()["data"]
+
+    clients = {}
+
+    for facture in factures:
+
+        nom = facture["client"]["name"]
+        montant = facture["total"]["vat_include"]
+
+        clients[nom] = clients.get(nom, 0) + montant
+
+    classement = sorted(
+        clients.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    return classement[:10]
