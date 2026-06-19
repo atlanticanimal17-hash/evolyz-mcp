@@ -284,3 +284,45 @@ def tableau_de_bord():
         "encaisse": round(encaisse, 2),
         "reste_a_encaisser": round(restant, 2)
     }
+
+@app.get("/client/{nom}")
+def client(nom: str):
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    page = 1
+
+    while True:
+
+        url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/clients?page={page}"
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=response.text
+            )
+
+        data = response.json()
+
+        for client in data["data"]:
+
+            if nom.lower() in client["name"].lower():
+
+                return {
+                    "clientid": client["clientid"],
+                    "code": client["code"],
+                    "nom": client["name"]
+                }
+
+        if page >= data["meta"]["last_page"]:
+            break
+
+        page += 1
+
+    return {"erreur": "client introuvable"}
