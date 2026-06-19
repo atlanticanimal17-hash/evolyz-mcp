@@ -1,42 +1,16 @@
-from fastapi import FastAPI
+from mcp.server.fastmcp import FastMCP
 
-app = FastAPI(
-    title="Evoliz MCP",
-    version="1.0.0"
-)
+mcp = FastMCP("Evoliz")
 
-@app.get("/")
-def root():
-    return {
-        "name": "evoliz-mcp",
-        "status": "ok",
-        "protocol": "mcp"
-    }
+@mcp.tool()
+def get_clients() -> str:
+    """Liste les clients Evoliz"""
+    return "Connexion Evoliz OK"
 
-@app.get("/health")
-def health():
-    return {
-        "status": "healthy"
-    }
+@mcp.tool()
+def get_invoices() -> str:
+    """Liste les factures Evoliz"""
+    return "Connexion Evoliz OK"
 
-@app.get("/tools")
-def tools():
-    return {
-        "tools": [
-            {
-                "name": "get_clients",
-                "description": "Liste les clients Evoliz"
-            },
-            {
-                "name": "get_invoices",
-                "description": "Liste les factures Evoliz"
-            }
-        ]
-    }
-
-@app.get("/mcp")
-def mcp():
-    return {
-        "protocol": "mcp",
-        "version": "1.0"
-    }
+if __name__ == "__main__":
+    mcp.run()
