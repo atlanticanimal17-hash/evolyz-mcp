@@ -13,4 +13,4 @@ def get_invoices() -> str:
     return "Connexion Evoliz OK"
 
 if __name__ == "__main__":
-    mcp.run(transport=sse")
+    mcp.run(transport="sse")
