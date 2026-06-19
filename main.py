@@ -88,3 +88,48 @@ def clients():
         )
 
     return response.json()
+@app.get("/impayes")
+def impayes():
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    url = f"https://www.evoliz.io/api/v1/companies/{COMPANY_ID}/invoices"
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=response.text
+        )
+
+    factures = response.json()["data"]
+
+    impayes = []
+
+    total_restant = 0
+
+    for facture in factures:
+
+        if facture["status"] != "paid":
+
+            montant = facture["total"]["net_to_pay"]
+
+            total_restant += montant
+
+            impayes.append({
+                "numero": facture["document_number"],
+                "client": facture["client"]["name"],
+                "montant": montant,
+                "statut": facture["status"]
+            })
+
+    return {
+        "nombre_factures_impayees": len(impayes),
+        "montant_total_restant": round(total_restant, 2),
+        "factures": impayes
+    }
