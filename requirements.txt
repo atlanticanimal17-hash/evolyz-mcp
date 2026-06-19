@@ -1,4 +1,2 @@
-fastapi
-uvicorn
-requests
 mcp==1.9.4
+uvicorn
