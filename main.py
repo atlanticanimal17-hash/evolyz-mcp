@@ -11,6 +11,3 @@ def get_clients() -> str:
 def get_invoices() -> str:
     """Liste les factures Evoliz"""
     return "Connexion Evoliz OK"
-
-if __name__ == "__main__":
-    mcp.run(transport="sse")
